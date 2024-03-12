@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
-import {b
+import {
   Button,
   Flex,
         Heading,
@@ -33,8 +33,8 @@ const App = ({ signOut }) => {
       const notesFromAPI = apiData.data.listTodos.items;
       await Promise.all(notesFromAPI.map(async (note) => {
           if (note.image) {
-              const url = await getUrl(note.name);
-              note.image = url;
+              const url = await getUrl(note.image);
+              note.url = url;
           }
           return note;
       }))
@@ -51,7 +51,7 @@ const App = ({ signOut }) => {
         image: image.name
     };
       if (!!data.image) await uploadData({
-          key: data.name,
+          key: image.name,
           data: image})
     await client.graphql({
       query: createTodoMutation,
@@ -61,10 +61,10 @@ const App = ({ signOut }) => {
     event.target.reset();
   }
 
-  async function deleteTodo({ id }) {
+    async function deleteTodo({ id, image }) {
     const newTodos = notes.filter((note) => note.id !== id);
       setTodos(newTodos);
-      await remove({ key: note.image })
+      await remove({ key: image })
     await client.graphql({
       query: deleteTodoMutation,
       variables: { input: { id } },
@@ -111,9 +111,10 @@ const App = ({ signOut }) => {
               {note.name}
             </Text>
               <Text as="span">{note.description}</Text>
-              {note.image && ( <Image src={note.image}
+              {note.image && ( <Image src={note.url}
                                       alt={`visual aid for ${note.name}`}
-                                      style={{ width: 400}})}
+                                      style={{ width: 400}} />)}
+              <Text as="span">{note.url}</Text>
             <Button variation="link" onClick={() => deleteTodo(note)}>
               Delete note
             </Button>
